@@ -1,12 +1,12 @@
 # Copyright (c) 2011-12 Michael Dvorkin
 #
-# Tiny Spec is freely distributable under the terms of MIT license.
+# Quickie is freely distributable under the terms of MIT license.
 # See LICENSE file or http://www.opensource.org/licenses/mit-license.php
 #------------------------------------------------------------------------------
 module Quickie
   class Hell < RuntimeError
     def oops
-      puts "\n#{self.message.chomp} in #{self.backtrace[2].sub(':', ', line ').sub(':', ' ')}"
+      puts "\n#{message.chomp} in #{backtrace[2].sub(':', ', line ').sub(':', ' ')}"
     end
   end
 

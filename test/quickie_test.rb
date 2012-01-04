@@ -1,10 +1,8 @@
 # Copyright (c) 2011-12 Michael Dvorkin
 #
-# Tiny Spec is freely distributable under the terms of MIT license.
+# Quickie is freely distributable under the terms of MIT license.
 # See LICENSE file or http://www.opensource.org/licenses/mit-license.php
 #------------------------------------------------------------------------------
-fail "Quickie requires Ruby 1.9.2 or higher" if RUBY_VERSION < '1.9.2'
-
 require "stringio"
 require File.expand_path(File.dirname(__FILE__) + "/../lib/quickie")
 
