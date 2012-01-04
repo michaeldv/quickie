@@ -11,5 +11,6 @@ abort "Quickie requires Ruby 1.9.2 or later" if RUBY_VERSION < "1.9.2"
 
 require File.dirname(__FILE__) + "/quickie/runner"
 require File.dirname(__FILE__) + "/quickie/matcher"
+require File.dirname(__FILE__) + "/quickie/stub"
 require File.dirname(__FILE__) + "/quickie/version"
 require File.dirname(__FILE__) + "/quickie/core_ext/object"

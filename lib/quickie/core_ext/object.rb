@@ -10,4 +10,9 @@ class Object
     end
     alias_method :"#{verb}_be", verb
   end
+
+  define_method :stub do |method, options = {}|
+    Quickie::Stub.new(self, method, options)
+  end
+  alias_method :stub!, :stub
 end

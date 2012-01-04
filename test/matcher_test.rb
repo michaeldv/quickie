@@ -61,52 +61,52 @@ capture { 1234567.should_not_be < 0 }.should == "."
 #--------------------------------------------------------------------------
 capture { "abc".should != "abc" }.should == <<-EOS.fix(__LINE__)
 expected: != "abc"
-  actual:    "abc" in test/quickie_test.rb, line ? in `block in <main>'
+  actual:    "abc" in #{__FILE__}, line ? in `block in <main>'
 EOS
 
 capture { "abc".should == "xyz" }.should == <<-EOS.fix(__LINE__)
 expected: == "xyz"
-  actual:    "abc" in test/quickie_test.rb, line ? in `block in <main>'
+  actual:    "abc" in #{__FILE__}, line ? in `block in <main>'
 EOS
 
 capture { "abc".should !~ /AB/i }.should == <<-EOS.fix(__LINE__)
 expected: !~ /AB/i
-  actual:    "abc" in test/quickie_test.rb, line ? in `block in <main>'
+  actual:    "abc" in #{__FILE__}, line ? in `block in <main>'
 EOS
 
 capture { "abc".should =~ /XY/i }.should == <<-EOS.fix(__LINE__)
 expected: =~ /XY/i
-  actual:    "abc" in test/quickie_test.rb, line ? in `block in <main>'
+  actual:    "abc" in #{__FILE__}, line ? in `block in <main>'
 EOS
 
 capture { 1234567.should_be < 0 }.should == <<-EOS.fix(__LINE__)
 expected: < 0
-  actual:   1234567 in test/quickie_test.rb, line ? in `block in <main>'
+  actual:   1234567 in #{__FILE__}, line ? in `block in <main>'
 EOS
 
 # Should Not - failing specs.
 #--------------------------------------------------------------------------
 capture { "abc".should_not == "abc" }.should == <<-EOS.fix(__LINE__)
 expected not: == "abc"
-      actual:    "abc" in test/quickie_test.rb, line ? in `block in <main>'
+      actual:    "abc" in #{__FILE__}, line ? in `block in <main>'
 EOS
 
 capture { "abc".should_not != "xyz" }.should == <<-EOS.fix(__LINE__)
 expected not: != "xyz"
-      actual:    "abc" in test/quickie_test.rb, line ? in `block in <main>'
+      actual:    "abc" in #{__FILE__}, line ? in `block in <main>'
 EOS
 
 capture { "abc".should_not =~ /AB/i }.should == <<-EOS.fix(__LINE__)
 expected not: =~ /AB/i
-      actual:    "abc" in test/quickie_test.rb, line ? in `block in <main>'
+      actual:    "abc" in #{__FILE__}, line ? in `block in <main>'
 EOS
 
 capture { "abc".should_not !~ /XY/i }.should == <<-EOS.fix(__LINE__)
 expected not: !~ /XY/i
-      actual:    "abc" in test/quickie_test.rb, line ? in `block in <main>'
+      actual:    "abc" in #{__FILE__}, line ? in `block in <main>'
 EOS
 
 capture { 1234567.should_not_be > 0 }.should == <<-EOS.fix(__LINE__)
 expected not: > 0
-      actual:   1234567 in test/quickie_test.rb, line ? in `block in <main>'
+      actual:   1234567 in #{__FILE__}, line ? in `block in <main>'
 EOS
