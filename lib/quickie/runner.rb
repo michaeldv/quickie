@@ -5,14 +5,18 @@
 #------------------------------------------------------------------------------
 module Quickie
   class Runner
+    @@trace = []
     @@stats = Hash.new(0)
 
-    def self.update(status)
+    def self.update(status, message = nil)
       at_exit {
-        puts "\n\nPassed: #{@@stats[:success]}, not quite: #{@@stats[:failure]}, total tests: #{@@stats.values.inject(:+)}."
+        puts
+        puts "\n" << @@trace.join("\n\n") unless @@trace.empty?
+        puts "\nPassed: #{@@stats[:success]}, not quite: #{@@stats[:failure]}, total tests: #{@@stats.values.inject(:+)}."
       } if @@stats.empty?
 
       @@stats[status] += 1
+      @@trace << message if message
     end
   end
 end
