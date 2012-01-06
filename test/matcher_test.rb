@@ -12,33 +12,24 @@ require File.expand_path(File.dirname(__FILE__) + "/../lib/quickie")
 #   2. Capture the output of the test.
 #   3. Make sure captured output matches the expectation.
 #
-# In addition, we hack the Quickie stats so that captured tests are not
-# counted in the actual results.
+# In addition, we hack the Quickie trace/stats so that failed captured
+# tests are not shown/counted in the actual results.
 #--------------------------------------------------------------------------
 def capture
-  stats = Quickie::Runner.class_variable_get('@@stats')
-  captured = StringIO.new
-  standard, $stdout = $stdout, captured
+  stats = Quickie::Runner.class_variable_get(:@@stats)
+  trace = Quickie::Runner.class_variable_get(:@@trace)
+
+  standard, $stdout = $stdout, StringIO.new
   yield
-  captured.string
+  $stdout.string
 ensure
-  $stdout = standard
-  if captured.string == '.'
+  if $stdout.string == '.'
     stats[:success] -= 1
   else
     stats[:failure] -= 1
+    trace.pop
   end
-  Quickie::Runner.class_variable_set('@@stats', stats)
-end
-
-#--------------------------------------------------------------------------
-class String
-  def fix(line)
-    self.sub!(/^/, "\n")            # Insert newline.
-    self.sub!("?", line.to_s)       # Insert actual line number.
-    self.sub!(/\n+Passed.+$/, "")   # Ignore the stats.
-    self
-  end
+  $stdout = standard
 end
 
 # Should - passing specs.
@@ -59,54 +50,16 @@ capture { 1234567.should_not_be < 0 }.should == "."
 
 # Should - failing specs.
 #--------------------------------------------------------------------------
-capture { "abc".should != "abc" }.should == <<-EOS.fix(__LINE__)
-expected: != "abc"
-  actual:    "abc" in #{__FILE__}, line ? in `block in <main>'
-EOS
-
-capture { "abc".should == "xyz" }.should == <<-EOS.fix(__LINE__)
-expected: == "xyz"
-  actual:    "abc" in #{__FILE__}, line ? in `block in <main>'
-EOS
-
-capture { "abc".should !~ /AB/i }.should == <<-EOS.fix(__LINE__)
-expected: !~ /AB/i
-  actual:    "abc" in #{__FILE__}, line ? in `block in <main>'
-EOS
-
-capture { "abc".should =~ /XY/i }.should == <<-EOS.fix(__LINE__)
-expected: =~ /XY/i
-  actual:    "abc" in #{__FILE__}, line ? in `block in <main>'
-EOS
-
-capture { 1234567.should_be < 0 }.should == <<-EOS.fix(__LINE__)
-expected: < 0
-  actual:   1234567 in #{__FILE__}, line ? in `block in <main>'
-EOS
+capture { "abc".should != "abc" }.should == "F"
+capture { "abc".should == "xyz" }.should == "F"
+capture { "abc".should !~ /AB/i }.should == "F"
+capture { "abc".should =~ /XY/i }.should == "F"
+capture { 1234567.should_be < 0 }.should == "F"
 
 # Should Not - failing specs.
 #--------------------------------------------------------------------------
-capture { "abc".should_not == "abc" }.should == <<-EOS.fix(__LINE__)
-expected not: == "abc"
-      actual:    "abc" in #{__FILE__}, line ? in `block in <main>'
-EOS
-
-capture { "abc".should_not != "xyz" }.should == <<-EOS.fix(__LINE__)
-expected not: != "xyz"
-      actual:    "abc" in #{__FILE__}, line ? in `block in <main>'
-EOS
-
-capture { "abc".should_not =~ /AB/i }.should == <<-EOS.fix(__LINE__)
-expected not: =~ /AB/i
-      actual:    "abc" in #{__FILE__}, line ? in `block in <main>'
-EOS
-
-capture { "abc".should_not !~ /XY/i }.should == <<-EOS.fix(__LINE__)
-expected not: !~ /XY/i
-      actual:    "abc" in #{__FILE__}, line ? in `block in <main>'
-EOS
-
-capture { 1234567.should_not_be > 0 }.should == <<-EOS.fix(__LINE__)
-expected not: > 0
-      actual:   1234567 in #{__FILE__}, line ? in `block in <main>'
-EOS
+capture { "abc".should_not == "abc" }.should == "F"
+capture { "abc".should_not != "xyz" }.should == "F"
+capture { "abc".should_not =~ /AB/i }.should == "F"
+capture { "abc".should_not !~ /XY/i }.should == "F"
+capture { 1234567.should_not_be > 0 }.should == "F"

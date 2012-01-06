@@ -6,7 +6,7 @@
 module Quickie
   class Hell < RuntimeError
     def oops
-      puts "\n#{message.chomp} in #{backtrace[2].sub(':', ', line ').sub(':', ' ')}"
+      "#{message.chomp} in #{backtrace[2].sub(':', ', line ').sub(':', ' ')}"
     end
   end
 
@@ -14,13 +14,11 @@ module Quickie
     def initialize(object, verb)
       @object = object
       @should = (verb == :should)
-      %w[ == === =~ > >= < <= => ].each do |operator|
-        self.class.override operator
-      end
     end
 
     private
 
+    # Override an operator to be able to tell whether it succeeded or not.
     #--------------------------------------------------------------------------
     def self.override(operator)
       define_method(operator) do |expected|
@@ -40,6 +38,8 @@ module Quickie
       end
     end
 
+    # Note that we always evaluate positive operators, and then flip the actual
+    # result based on should/should_not request.
     #--------------------------------------------------------------------------
     def evaluate(operator, negative_operator, expected)
       actual = !!@object.__send__(operator, expected)
@@ -48,14 +48,14 @@ module Quickie
       if actual
         report :success
       else
-        report :failure
         raise Hell, lyrics(negative_operator || operator, expected)
       end
 
     rescue Hell => e
-      e.oops
+      report :failure, e.oops
     end
 
+    # Format actual vs. expected message.
     #--------------------------------------------------------------------------
     def lyrics(operator, expected)
       format = "expected: %s %s\n  actual: %s %s"
@@ -63,10 +63,23 @@ module Quickie
       format % [ operator, expected.inspect, ' ' * operator.size, @object.inspect ]
     end
 
+    # Report test success and/or failure. When running within IRB or Pry the
+    # message gets displayed immediately, otherwise all the messages are shown
+    # by the Runner in at_exit block.
     #--------------------------------------------------------------------------
-    def report(status)
-      print '.' if status == :success
-      Runner.update(status)
+    def report(status, message = nil)
+      print(status == :success ? '.' : 'F')
+      if !defined?(::IRB) && !defined?(::Pry)
+        Runner.update(status, message)
+      else
+        puts "\n\n#{message}"
+      end
+    end
+
+    # The matcher magic starts here ;-)
+    #--------------------------------------------------------------------------
+    %w[ == === =~ > >= < <= => ].each do |operator|
+      override operator
     end
   end
 end
