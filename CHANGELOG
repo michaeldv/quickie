@@ -1,2 +1,6 @@
+0.2.0
+  - Improved actual vs. expected reporting.
+  - Improved user experience when running within IRB or Pry.
+
 0.1.0
   - Initial Release.
