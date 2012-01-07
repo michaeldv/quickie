@@ -55,7 +55,6 @@ Ruby 1.9.2 or later.
     Passed: 6, not quite: 0, total tests: 6.
 
 ### Usage Example - Method Stubs ###
-
 To set up a stub with optional return value use <code>obj.stub(:method, :return => value)</code>.
 To remove existing stub and restore original method use <code>obj.stub(:method, :remove)</code>.
 
@@ -106,9 +105,9 @@ To remove existing stub and restore original method use <code>obj.stub(:method, 
 Quickie code is tested by the Quickie itself.
 
     $ ruby test/quickie_test.rb
-    ....................
+    ................................
     
-    Passed: 20, not quite: 0, total tests: 20.
+    Passed: 32, not quite: 0, total tests: 32.
 
 ### Note on Patches/Pull Requests ###
 * Fork the project on Github.

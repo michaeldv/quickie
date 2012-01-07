@@ -1,3 +1,6 @@
+0.3.0
+  - Implemented method stubs.
+
 0.2.0
   - Improved actual vs. expected reporting.
   - Improved user experience when running within IRB or Pry.
