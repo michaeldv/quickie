@@ -1,51 +1,59 @@
-# Copyright (c) 2011 Michael Dvorkin
+# Copyright (c) 2011-12 Michael Dvorkin
 #
 # Quickie is freely distributable under the terms of MIT license.
 # See LICENSE file or http://www.opensource.org/licenses/mit-license.php
 #------------------------------------------------------------------------------
 module Quickie
   class Stub
+    #
+    # To set up a stub with optional return value:
+    #   obj.stub(:method, :return => something)
+    #
+    # To remove existing stub and restore original method:
+    #   obj.stub(:method, :remove)
+    #
+    #--------------------------------------------------------------------------
     def initialize(object, method, options = {})
-      # Turn obj.stub(:method, :remove) into obj.stub(:method, :remove => true)
       options = { options => true } if options.is_a?(Symbol)
+      @object, @options = object, options
       @@stash ||= []
-      @object, @return = object, options[:return]
-
-      # To set up a stub with optional return value:
-      #   obj.stub(:method, :return => something)
       #
-      # To remove existing stub and restore original method:
-      #   obj.stub(:method, :remove)
+      # Create a new stub by intercepting the method or remove existing stub
+      # by restoring the original method.
       #
-      options[:remove] ? restore(method) : intercept(method)
-        
-      # $stderr.reopen("/dev/null", "w") to disable debug noise.
-      $stderr.puts "obj: #{@object}, msg: #{@method}, opt: #{options.inspect}"
+      unless @options[:remove]
+        intercept(method)
+      else
+        restore(method)
+      end
     end
 
     private
 
+    # Same as class << @object; self; end -- comes with Ruby 1.9.
     #--------------------------------------------------------------------------
     def metaclass
-      class << @object; self; end
+      @object.singleton_class
     end
 
+    # Unique name the original method gets stashed under when creating a stub.
     #--------------------------------------------------------------------------
     def moniker(method)
-      :"__original__#{method}"
+      :"__#{method}__#{@object.__id__}"
     end
 
+    # Return method's visibility, nil if public.
     #--------------------------------------------------------------------------
     def visibility(method)
       if metaclass.private_method_defined?(method)
-        'private'
+        :private
       elsif metaclass.protected_method_defined?(method)
-        'protected'
-      else
-        'public'
+        :protected
       end
     end
 
+    # Set up a stub by stashing the original method under different name and
+    # then rediefining the method to return the requested value.
     #--------------------------------------------------------------------------
     def intercept(method)
       new_name = moniker(method)
@@ -55,50 +63,47 @@ module Quickie
       end
     end
 
+    # Preserve original method by creating its alias with the unique name.
     #--------------------------------------------------------------------------
     def stash(method, new_name)
       metaclass.class_eval do
         if method_defined?(method) || private_method_defined?(method)
-          $stderr.puts "aliasing #{new_name} as #{method}"
           alias_method new_name, method
         end
       end
       @@stash << new_name
     end
 
+    # Create a stub that returns requested value.
     #--------------------------------------------------------------------------
     def redefine(method)
-      $stderr.puts "redefine: #{method}, return #{@return}"
-      return_value = @return
+      return_value = @options[:return]
       metaclass.class_eval do
         define_method method do |*args, &block|
           return_value
         end
       end
-
-      visibility_attribute = visibility(method)
-      metaclass.class_eval(<<-EOF, __FILE__, __LINE__)
-        #{visibility_attribute} :#{method}
-      EOF
+      #
+      # Set visibility attribute if the origial method is not public.
+      #
+      private_or_protected = visibility(method)
+      metaclass.class_eval("#{private_or_protected} :#{method}") if private_or_protected
     end
 
+    # Remove the stub and restore the original method.
     #--------------------------------------------------------------------------
     def restore(method)
-      $stderr.puts "restoring: #{method}"
       stashed_name = moniker(method)
-      if @@stash.include? stashed_name
+      if @@stash.include? stashed_name          # Was it ever stubbed?
         metaclass.instance_eval do
           if method_defined?(stashed_name) || private_method_defined?(stashed_name)
-            $stderr.puts "removing #{method}"
-            remove_method method
-            $stderr.puts "aliasing #{method} as #{stashed_name}"
-            alias_method method, stashed_name
-            $stderr.puts "removing stashed #{stashed_name}"
-            remove_method stashed_name
+            remove_method method                # Remove the stub.
+            alias_method method, stashed_name   # Restore the original method from stash.
+            remove_method stashed_name          # Remove stashed copy.
           end
         end
+        @@stash.delete stashed_name
       end
-      @@stash.delete stashed_name
     end
   end
 end

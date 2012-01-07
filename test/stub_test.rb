@@ -3,17 +3,27 @@
 # Quickie is freely distributable under the terms of MIT license.
 # See LICENSE file or http://www.opensource.org/licenses/mit-license.php
 #------------------------------------------------------------------------------
-require "stringio"
 require File.expand_path(File.dirname(__FILE__) + "/../lib/quickie")
 
-$stderr.reopen("/dev/null", "w") # Disable debug noise.
+numbers = [ 1, 2, 3 ]
+letters = %w(a b c)
 
-arr = [ 1, 2, 3 ]
-arr.stub! :join, :return => "Hello, world"
+numbers.stub! :join, :return => 42              # Stub numbers#join to return arbitrary value.
+numbers.join.should == 42                       # Test numbers.join().
+numbers.join(",").should == 42                  # Test numbers.join(arg).
+letters.join.should == "abc"                    # letters array is unaffected by numbers#join.
 
-arr.join.should == "Hello, world"
-arr.join(",").should == "Hello, world"
+letters.stub! :join, :return => "Hello, world!" # Now stub letters#join.
+letters.join.should == "Hello, world!"          # Test letters.join().
+letters.join(",").should == "Hello, world!"     # Test letters.join(arg).
+numbers.join.should == 42                       # numbers#join stub is unaffected by letters#join stub.
+numbers.join(",").should == 42                  # Ditto.
 
-arr.stub :join, :remove
-arr.join.should == "123"
-arr.join(",").should == "1,2,3"
+numbers.stub :join, :remove                     # Remove numbers#join stub.
+numbers.join.should == "123"                    # numbers.join() should work as expected.
+numbers.join(",").should == "1,2,3"             # numbers.join(arg) should work as expected.
+letters.join.should == "Hello, world!"          # letters#join remains stubbed.
+
+letters.stub :join, :remove                     # Now remove letters#join stub.
+letters.join.should == "abc"                    # letters.join() should work as expected.
+letters.join(",").should == "a,b,c"             # letters.join(arg) should work as expected.

@@ -21,13 +21,13 @@ Gem::Specification.new do |s|
   s.email       = "mike@dvorkin.net"
   s.homepage    = "http://github.com/michaeldv/quickie"
   s.summary     = "Micro framework for in-place testing of Ruby code"
-  s.description = "Quickie adds Object#should and Object#should_not methods for quick testing of your Ruby code"
+  s.description = "Quickie adds Object#should, Object#should_not, and Object#stub methods for quick and easy testing of your Ruby code"
 
   s.rubyforge_project = "quickie"
   s.required_ruby_version = ">= 1.9.2"
 
   s.files         = Rake::FileList["[A-Z]*", "lib/**/*.rb", "test/*", ".gitignore"]
-  s.test_files    = Rake::FileList["spec/*"]
+  s.test_files    = Rake::FileList["test/*"]
   s.executables   = []
   s.require_paths = ["lib"]
 end
